@@ -2,10 +2,19 @@ import React, {Component} from 'react';
 import './Calculator.css';
 
 import Button from '../components/Button';
-
 import Display from '../components/Display';
 
+const initialState = {
+  displayValue: '0',
+  clearDisplay: false,
+  operation:null,
+  values: [0,0],
+  current:0
+}
+
 export default class Calculator extends Component {
+  state = {...initialState}
+  
   constructor(props) {
     super(props)
 
@@ -18,23 +27,42 @@ export default class Calculator extends Component {
 
   // função limpar
   clearMemory() {
-    console.log('limpar')
-    Display.value=''
+    this.setState({...initialState})
   }
-  // funcao setar Operação
+  // função setar Operação
   setOperation(operation){
     console.log(operation)
   }
   // funcao add digito
   addDigit(n){
-    console.log(n)
+    // regra para evitar ter 2 pontos na calculadora
+    if(n === '.' && this.state.displayValue.includes('.')){
+      return 
+    }
+    const clearDisplay = this.state.displayValue === '0' || this.state.clearDisplay
+    // se o clear display for true o valor vai ser vazio
+    // se o display não for ser limpo vai pegar o this.state.displayValue
+    const currentValue = clearDisplay ? '' : this.state.displayValue
+    const displayValue = currentValue + n
+    // passando o proprio displayValue de cima e uma vez que digita o valor e já limpou ali em cima 
+    // eu coloco o clearDisplay como false
+    this.setState({displayValue, clearDisplay: false})
+
+    if(n!== '.') {
+      const i = this.state.current
+      const newValue = parseFloat(displayValue)
+      const values = [...this.state.values]
+      values[i]=newValue
+      this.setState({values})
+      console.log(values)
+    }
   }
 
   render(){
 
     return(
       <div className="calculator">
-        <Display value={100}/>
+        <Display value={this.state.displayValue}/>
         <Button label="AC" click={this.clearMemory} triple/>
         <Button label="/" click={this.setOperation} operation/>
         <Button label="7" click={this.addDigit}/>
